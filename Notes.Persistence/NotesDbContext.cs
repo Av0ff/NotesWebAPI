@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Notes.Persistence
 {
-	internal class NotesDbContext : DbContext, INotesDbContext
+	public class NotesDbContext : DbContext, INotesDbContext
 	{
 		public NotesDbContext(DbContextOptions<NotesDbContext> options)
 			:base(options)
