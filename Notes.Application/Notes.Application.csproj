@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Notes.Domain\Notes.Domain.csproj" />
+    <ProjectReference Include="..\Notes.WebAPI\Notes.WebAPI.csproj" />
   </ItemGroup>
 
 </Project>
