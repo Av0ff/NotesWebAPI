@@ -9,6 +9,6 @@ namespace Notes.Application.Notes.Commands.CreateNote
 	{
 		public Guid UserId { get; set; }
 		public string Title { get; set; }
-		public string Descriprion { get; set; }
+		public string Description { get; set; }
 	}
 }

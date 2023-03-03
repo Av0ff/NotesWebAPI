@@ -68,10 +68,10 @@ namespace Notes.WebAPI
 			}
 
 			app.UseCustomExceptionHandler();
+			app.UseHttpsRedirection();
 			app.UseAuthentication();
 			app.UseRouting();
 			app.UseAuthorization();
-			app.UseHttpsRedirection();
 			app.UseCors("AllowAll");
 
 			app.UseEndpoints(endpoints =>
