@@ -12,6 +12,7 @@ using Notes.Persistence;
 using Notes.WebAPI.Middleware;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -58,6 +59,13 @@ namespace Notes.WebAPI
 					ops.Audience = "NotesWebApi";
 					ops.RequireHttpsMetadata = false;
 				});
+
+			services.AddSwaggerGen(config =>
+			{
+				var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+				var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+				config.IncludeXmlComments(xmlPath);
+			});
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -67,6 +75,12 @@ namespace Notes.WebAPI
 				app.UseDeveloperExceptionPage();
 			}
 
+			app.UseSwagger();
+			app.UseSwaggerUI(config =>
+			{
+				config.RoutePrefix = string.Empty;
+				config.SwaggerEndpoint("swagger/v1/swagger.json", "Notes API");
+			});
 			app.UseCustomExceptionHandler();
 			app.UseHttpsRedirection();
 			app.UseAuthentication();
