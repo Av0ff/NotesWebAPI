@@ -2,14 +2,17 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Notes.Application;
 using Notes.Application.Common.Mappings;
 using Notes.Application.Interfaces;
 using Notes.Persistence;
 using Notes.WebAPI.Middleware;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,6 +41,7 @@ namespace Notes.WebAPI
 			services.AddApplication();
 			services.AddPersistence(_configuration);
 			services.AddControllers();
+
 			services.AddCors(options =>
 			{
 				options.AddPolicy("AllowAll", policy =>
@@ -60,15 +64,15 @@ namespace Notes.WebAPI
 					ops.RequireHttpsMetadata = false;
 				});
 
-			services.AddSwaggerGen(config =>
-			{
-				var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-				var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-				config.IncludeXmlComments(xmlPath);
-			});
+			services.AddVersionedApiExplorer(options =>
+				options.GroupNameFormat = "'v'VVV");
+			services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+
+			services.AddSwaggerGen();
+			services.AddApiVersioning();
 		}
 
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
 		{
 			if (env.IsDevelopment())
 			{
@@ -78,15 +82,20 @@ namespace Notes.WebAPI
 			app.UseSwagger();
 			app.UseSwaggerUI(config =>
 			{
-				config.RoutePrefix = string.Empty;
-				config.SwaggerEndpoint("swagger/v1/swagger.json", "Notes API");
+				foreach(var description in provider.ApiVersionDescriptions)
+				{
+					config.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+						description.GroupName.ToUpperInvariant());
+					config.RoutePrefix = string.Empty;
+				}
 			});
 			app.UseCustomExceptionHandler();
-			app.UseHttpsRedirection();
-			app.UseAuthentication();
 			app.UseRouting();
-			app.UseAuthorization();
+			app.UseHttpsRedirection();
 			app.UseCors("AllowAll");
+			app.UseAuthentication();
+			app.UseAuthorization();
+			app.UseApiVersioning();
 
 			app.UseEndpoints(endpoints =>
 			{
