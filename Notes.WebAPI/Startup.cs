@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -54,15 +56,24 @@ namespace Notes.WebAPI
 
 			services.AddAuthentication(config =>
 			{
-				config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-				config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+				config.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+				config.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 			})
-				.AddJwtBearer(ops =>
+				.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+				.AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, config =>
 				{
-					ops.Authority = "http://localhost:33161/";
-					ops.Audience = "NotesWebApi";
-					ops.RequireHttpsMetadata = false;
+					config.Authority = "https://localhost:3001";
+					config.ClientId = "notes-api";
+					config.SaveTokens = true;
+					config.ResponseType = "code";
 				});
+			//.AddJwtBearer(ops =>
+			//{
+			//	ops.Authority = "http://localhost:3001";
+			//	ops.Audience = "NotesWebApi";
+			//	ops.RequireHttpsMetadata = false;
+			//	ops.SaveToken = true;
+			//});
 
 			services.AddVersionedApiExplorer(options =>
 				options.GroupNameFormat = "'v'VVV");

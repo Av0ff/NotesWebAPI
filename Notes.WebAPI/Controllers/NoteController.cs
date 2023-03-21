@@ -100,7 +100,8 @@ namespace Notes.WebAPI.Controllers
 			var command = _mapper.Map<CreateNoteCommand>(createNote);
 			command.UserId = UserId;
 			var noteId = await Mediator.Send(command);
-			return Ok(noteId);
+			//return Ok(noteId);
+			return Created($"https://localhost:5001/api/1.0/Note/{noteId.ToString()}", noteId);
 		}
 
 		/// <summary>
